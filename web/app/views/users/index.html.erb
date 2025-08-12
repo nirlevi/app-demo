@@ -1,0 +1,110 @@
+<% content_for :page_title, "Users" %>
+
+<div class="page-header">
+  <h1>Team Members</h1>
+  <p>Manage your organization's users and permissions</p>
+</div>
+
+<div class="filters">
+  <%= form_with url: users_path, method: :get, local: true, class: "filter-form" do |f| %>
+    <%= f.text_field :search, placeholder: "Search users...", value: params[:search] %>
+    <%= f.select :role, options_for_select([['All Roles', ''], ['Owner', 'owner'], ['Admin', 'admin'], ['Agent', 'agent'], ['Member', 'member']], params[:role]), {}, { class: "form-select" } %>
+    <%= f.select :active, options_for_select([['All Status', ''], ['Active', 'true'], ['Inactive', 'false']], params[:active]), {}, { class: "form-select" } %>
+    <%= f.submit "Filter", class: "btn btn-secondary" %>
+  <% end %>
+</div>
+
+<div class="users-list">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Last Active</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @users.each do |user| %>
+        <tr>
+          <td>
+            <%= link_to user_path(user) do %>
+              <strong><%= user.full_name %></strong>
+            <% end %>
+          </td>
+          <td><%= user.email %></td>
+          <td>
+            <span class="role-badge <%= user.role %>">
+              <%= user.role.humanize %>
+            </span>
+          </td>
+          <td>
+            <span class="status-badge <%= user.active? ? 'active' : 'inactive' %>">
+              <%= user.active? ? 'Active' : 'Inactive' %>
+            </span>
+          </td>
+          <td>
+            <%= user.updated_at.strftime("%b %d, %Y") %>
+          </td>
+          <td class="actions">
+            <%= link_to "View", user_path(user), class: "btn btn-sm btn-outline" %>
+            <% if can_manage_user?(user) %>
+              <div class="dropdown">
+                <button class="btn btn-sm btn-outline dropdown-toggle">Actions</button>
+                <div class="dropdown-menu">
+                  <% unless user.role == 'owner' %>
+                    <%= link_to "Change Role", "#", 
+                        class: "dropdown-item", 
+                        data: { 
+                          toggle: "modal", 
+                          target: "#roleModal#{user.id}" 
+                        } %>
+                  <% end %>
+                  <%= link_to user.active? ? "Deactivate" : "Activate", 
+                      toggle_active_user_path(user), 
+                      method: :patch,
+                      class: "dropdown-item #{'text-warning' unless user.active?}",
+                      confirm: "Are you sure?" %>
+                </div>
+              </div>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% if @users.empty? %>
+    <div class="empty-state">
+      <h3>No users found</h3>
+      <p>No users match your current filters.</p>
+    </div>
+  <% end %>
+</div>
+
+<!-- Role Change Modals -->
+<% @users.each do |user| %>
+  <% unless user.role == 'owner' %>
+    <div id="roleModal<%= user.id %>" class="modal">
+      <div class="modal-content">
+        <h3>Change Role for <%= user.full_name %></h3>
+        <%= form_with url: change_role_user_path(user), method: :patch, local: true do |f| %>
+          <%= f.select :role, 
+              options_for_select([
+                ['Admin', 'admin'], 
+                ['Agent', 'agent'], 
+                ['Member', 'member']
+              ].reject { |option| option[1] == user.role }), 
+              {}, 
+              { class: "form-select" } %>
+          <div class="modal-actions">
+            <%= f.submit "Change Role", class: "btn btn-primary" %>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

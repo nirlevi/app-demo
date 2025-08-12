@@ -1,0 +1,11 @@
+one:
+  name: "Test Organization"
+  slug: "test-org"
+  plan: "free"
+  active: true
+
+two:
+  name: "Another Org"
+  slug: "another-org"
+  plan: "premium"
+  active: true

@@ -1,0 +1,87 @@
+<% content_for :page_title, "Calls Management" %>
+
+<div class="calls-page">
+  <div class="page-header">
+    <div class="filters-bar" data-controller="filters">
+      <%= form_with url: calls_path, method: :get, local: true, class: "filters-form" do |f| %>
+        <div class="filter-group">
+          <%= f.text_field :search, placeholder: "Search calls...", value: params[:search], 
+                          class: "form-control", 
+                          data: { action: "input->filters#debounceSubmit" } %>
+        </div>
+        
+        <div class="filter-group">
+          <%= f.select :status, 
+                      options_for_select([
+                        ['All Statuses', ''],
+                        ['Active', 'active'],
+                        ['Completed', 'completed'],
+                        ['Failed', 'failed']
+                      ], params[:status]), 
+                      {}, { class: "form-control", data: { action: "change->filters#submit" } } %>
+        </div>
+        
+        <div class="filter-group date-range">
+          <%= f.date_field :date_from, value: params[:date_from], class: "form-control" %>
+          <span>to</span>
+          <%= f.date_field :date_to, value: params[:date_to], class: "form-control" %>
+        </div>
+        
+        <%= f.submit "Filter", class: "btn btn-primary" %>
+        <%= link_to "Clear", calls_path, class: "btn btn-secondary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="calls-content">
+    <div class="results-info">
+      <p>Showing <%= @calls.count %> of <%= @total_count %> calls</p>
+    </div>
+
+    <div class="calls-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date/Time</th>
+            <th>Phone Number</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>Agent</th>
+            <th>Rating</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @calls.each do |call| %>
+            <tr data-controller="call-row" data-call-id="<%= call.id %>">
+              <td><%= call.created_at.strftime("%m/%d %H:%M") %></td>
+              <td><%= call.name %></td>
+              <td><%= call.description || "00:00" %></td>
+              <td><span class="status <%= call.status&.downcase %>"><%= call.status || 'active' %></span></td>
+              <td><%= call.user&.email || 'System' %></td>
+              <td>
+                <div class="star-rating">
+                  <% 5.times do |i| %>
+                    <span class="star">⭐</span>
+                  <% end %>
+                </div>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <%= link_to "View", call_path(call), class: "btn btn-sm btn-outline" %>
+                  <% if call.description.present? %>
+                    <%= link_to "🎧", recordings_call_path(call), class: "btn btn-sm btn-outline", title: "Play Recording" %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <%= paginate @calls if respond_to?(:paginate) %>
+    </div>
+  </div>
+</div>

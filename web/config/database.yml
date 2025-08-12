@@ -1,0 +1,57 @@
+# PostgreSQL. Versions 9.3 and up are supported.
+#   gem install pg
+#
+#   Ensure the pg gem is defined in your Gemfile
+#   gem "pg"
+#
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # For common configuration options see:
+  # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING
+
+development:
+  <<: *default
+  database: voipappz_development
+  # The specified database role being used to connect to postgres.
+  # To create additional roles in postgres see `$ createuser --help`.
+  # When left blank, postgres will use the default role. This is
+  # the same name as the operating system user running Rails.
+  username: <%= ENV['DATABASE_USER'] || ENV['USER'] %>
+  # The password associated with the postgres role (username).
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  # Connect on a TCP socket. Omitted by default since the client uses a
+  # domain socket that doesn't need configuration. Windows does not have
+  # domain sockets, so uncomment these lines.
+  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
+  port: <%= ENV['DATABASE_PORT'] || 5433 %>
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  <<: *default
+  database: voipappz_test
+  username: <%= ENV['DATABASE_USER'] || ENV['USER'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: <%= ENV['DATABASE_HOST'] || 'localhost' %>
+  port: <%= ENV['DATABASE_PORT'] || 5433 %>
+
+# As with config/credentials.yml, you never want to store sensitive information,
+# like your database password, in your source code. If your source code is
+# ever seen by anyone, they now have access to your database.
+#
+# Instead, provide the password or a full connection URL as an environment
+# variable when you boot the app. For example:
+#
+#   DATABASE_URL="postgres://myuser:mypass@localhost/somedatabase"
+#
+# If provided, a database URL will override any other connection parameters.
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
+  database: voipappz_production
+  username: voipappz
+  password: <%= ENV["VOIPAPPZ_DATABASE_PASSWORD"] %>

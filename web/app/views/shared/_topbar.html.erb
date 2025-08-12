@@ -1,0 +1,16 @@
+<div class="topbar">
+  <div class="topbar-left">
+    <h1><%= yield :page_title %></h1>
+  </div>
+  
+  <div class="topbar-right">
+    <span class="current-time" data-controller="clock">
+      <%= Time.current.strftime("%H:%M:%S") %>
+    </span>
+    
+    <div class="user-menu">
+      <span><%= current_user.email %></span>
+      <%= link_to "Logout", logout_path, method: :delete, class: "logout-link", data: { turbo: false } %>
+    </div>
+  </div>
+</div>

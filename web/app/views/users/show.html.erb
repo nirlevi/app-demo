@@ -1,0 +1,140 @@
+<% content_for :page_title, @user.full_name %>
+
+<div class="page-header">
+  <div class="header-actions">
+    <%= link_to "← Back to Users", users_path, class: "btn btn-outline" %>
+  </div>
+  <h1><%= @user.full_name %></h1>
+  <p>User profile and activity</p>
+</div>
+
+<div class="user-profile">
+  <div class="profile-grid">
+    <div class="profile-section">
+      <h3>Profile Information</h3>
+      <div class="profile-details">
+        <div class="detail-row">
+          <label>Name:</label>
+          <span><%= @user.full_name %></span>
+        </div>
+        <div class="detail-row">
+          <label>Email:</label>
+          <span><%= @user.email %></span>
+        </div>
+        <div class="detail-row">
+          <label>Role:</label>
+          <span class="role-badge <%= @user.role %>">
+            <%= @user.role.humanize %>
+          </span>
+        </div>
+        <div class="detail-row">
+          <label>Status:</label>
+          <span class="status-badge <%= @user.active? ? 'active' : 'inactive' %>">
+            <%= @user.active? ? 'Active' : 'Inactive' %>
+          </span>
+        </div>
+        <div class="detail-row">
+          <label>Organization:</label>
+          <span><%= @user.organization.name %></span>
+        </div>
+        <div class="detail-row">
+          <label>Joined:</label>
+          <span><%= @user.created_at.strftime("%B %d, %Y") %></span>
+        </div>
+        <div class="detail-row">
+          <label>Last Updated:</label>
+          <span><%= @user.updated_at.strftime("%B %d, %Y at %I:%M %p") %></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <h3>Activity Summary</h3>
+      <div class="activity-stats">
+        <div class="stat-item">
+          <span class="stat-value"><%= @user.created_items.count %></span>
+          <span class="stat-label">Items Created</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value"><%= @user.created_items.where('created_at >= ?', 30.days.ago).count %></span>
+          <span class="stat-label">This Month</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value"><%= @user.created_items.where('created_at >= ?', 7.days.ago).count %></span>
+          <span class="stat-label">This Week</span>
+        </div>
+      </div>
+    </div>
+
+    <% if can_manage_user?(@user) %>
+      <div class="profile-section">
+        <h3>Management Actions</h3>
+        <div class="management-actions">
+          <% unless @user.role == 'owner' %>
+            <button class="btn btn-outline" data-toggle="modal" data-target="#roleModal">
+              Change Role
+            </button>
+          <% end %>
+          <%= link_to @user.active? ? "Deactivate User" : "Activate User", 
+              toggle_active_user_path(@user), 
+              method: :patch,
+              class: "btn #{ @user.active? ? 'btn-warning' : 'btn-success'}",
+              confirm: "Are you sure?" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<% if @user.created_items.any? %>
+  <div class="recent-items">
+    <h3>Recent Items</h3>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @user.created_items.recent.limit(10).each do |item| %>
+          <tr>
+            <td><%= item.name %></td>
+            <td><%= item.category.humanize %></td>
+            <td>
+              <span class="status <%= item.status %>">
+                <%= item.status.humanize %>
+              </span>
+            </td>
+            <td><%= item.created_at.strftime("%b %d, %Y") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<!-- Role Change Modal -->
+<% if can_manage_user?(@user) && @user.role != 'owner' %>
+  <div id="roleModal" class="modal">
+    <div class="modal-content">
+      <h3>Change Role for <%= @user.full_name %></h3>
+      <%= form_with url: change_role_user_path(@user), method: :patch, local: true do |f| %>
+        <%= f.select :role, 
+            options_for_select([
+              ['Admin', 'admin'], 
+              ['Agent', 'agent'], 
+              ['Member', 'member']
+            ].reject { |option| option[1] == @user.role }), 
+            {}, 
+            { class: "form-select" } %>
+        <div class="modal-actions">
+          <%= f.submit "Change Role", class: "btn btn-primary" %>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

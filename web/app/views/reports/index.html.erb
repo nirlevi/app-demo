@@ -1,0 +1,102 @@
+<% content_for :page_title, "Reports & Analytics" %>
+
+<div class="reports-page">
+  <div class="page-header">
+    <div class="report-controls" data-controller="date-picker">
+      <%= form_with url: reports_path, method: :get, local: true, class: "date-range-form" do |f| %>
+        <div class="date-range-group">
+          <label>From:</label>
+          <%= f.date_field :date_from, value: @date_from, class: "form-control" %>
+          
+          <label>To:</label>
+          <%= f.date_field :date_to, value: @date_to, class: "form-control" %>
+          
+          <%= f.submit "Update Report", class: "btn btn-primary" %>
+        </div>
+        
+        <div class="quick-ranges">
+          <%= link_to "Today", reports_path(date_from: Date.current, date_to: Date.current), class: "btn btn-outline" %>
+          <%= link_to "This Week", reports_path(date_from: 1.week.ago, date_to: Date.current), class: "btn btn-outline" %>
+          <%= link_to "This Month", reports_path(date_from: 1.month.ago, date_to: Date.current), class: "btn btn-outline" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="reports-content">
+    <div class="reports-grid">
+      <div class="report-section chart-section">
+        <h3>Call Volume Over Time</h3>
+        <div class="chart-container" data-controller="chart" data-chart-type-value="bar">
+          <!-- Simple ASCII chart for now -->
+          <div class="simple-chart">
+            <% 7.days.ago.to_date.upto(Date.current).each do |date| %>
+              <div class="chart-bar">
+                <div class="bar" style="height: <%= rand(20..80) %>px;"></div>
+                <div class="label"><%= date.strftime("%m/%d") %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h3>Performance Metrics</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-value"><%= @items.count %></div>
+            <div class="metric-label">Total Calls</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value"><%= @items.where(status: 'completed').count %></div>
+            <div class="metric-label">Successful</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value">2:34</div>
+            <div class="metric-label">Avg Duration</div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-value">4.2</div>
+            <div class="metric-label">Avg Rating</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-section table-section">
+        <h3>Detailed Call Data</h3>
+        <div class="export-controls">
+          <%= link_to "Export CSV", reports_path(format: :csv), class: "btn btn-outline" %>
+          <%= link_to "Export PDF", reports_path(format: :pdf), class: "btn btn-outline" %>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Number</th>
+              <th>Duration</th>
+              <th>Status</th>
+              <th>Agent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @items.limit(20).each do |item| %>
+              <tr>
+                <td><%= item.created_at.strftime("%m/%d/%Y") %></td>
+                <td><%= item.created_at.strftime("%H:%M") %></td>
+                <td><%= item.name %></td>
+                <td><%= item.description || "00:00" %></td>
+                <td><span class="status <%= item.status&.downcase %>"><%= item.status || 'completed' %></span></td>
+                <td><%= item.user&.email || 'System' %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VoipAppz Dashboard</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="<%= user_signed_in? ? 'app-layout' : 'auth-layout' %>" <% unless user_signed_in? %>data-turbo="false"<% end %>>
+    <% if user_signed_in? %>
+      <div class="app-container">
+        <%= render 'shared/sidebar' %>
+        <div class="main-content">
+          <%= render 'shared/topbar' %>
+          <div class="content">
+            <%= yield %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="auth-container" data-turbo="false">
+        <%= yield %>
+      </div>
+    <% end %>
+  </body>
+</html>

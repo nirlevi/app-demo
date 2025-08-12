@@ -1,0 +1,15 @@
+one:
+  name: "Sample Item"
+  description: "A test item"
+  category: "communication"
+  status: "active"
+  organization: one
+  created_by: one
+
+two:
+  name: "Another Item"
+  description: "Another test item"
+  category: "productivity"
+  status: "inactive"
+  organization: one
+  created_by: one

@@ -1,0 +1,17 @@
+default: &default
+  # AnyCable configuration
+  redis_url: redis://localhost:6379/1
+  rpc_host: localhost:50051
+  log_level: info
+  log_file: log/anycable.log
+  
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
+  redis_url: <%= ENV.fetch("REDIS_URL", "redis://localhost:6379/1") %>
+  rpc_host: <%= ENV.fetch("ANYCABLE_RPC_HOST", "localhost:50051") %>

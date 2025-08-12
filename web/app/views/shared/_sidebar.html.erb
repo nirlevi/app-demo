@@ -1,0 +1,47 @@
+<div class="sidebar">
+  <div class="sidebar-header">
+    <%= link_to dashboard_path, class: "logo" do %>
+      <h2>VoipAppz</h2>
+    <% end %>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul>
+      <li class="<%= 'active' if controller_name == 'dashboard' %>">
+        <%= link_to dashboard_path do %>
+          <span class="icon">📊</span>
+          Live Dashboard
+        <% end %>
+      </li>
+      
+      <li class="<%= 'active' if controller_name == 'calls' %>">
+        <%= link_to calls_path do %>
+          <span class="icon">📞</span>
+          Calls
+        <% end %>
+      </li>
+      
+      <li class="<%= 'active' if controller_name == 'reports' %>">
+        <%= link_to reports_path do %>
+          <span class="icon">📈</span>
+          Reports
+        <% end %>
+      </li>
+      
+      <li class="<%= 'active' if controller_name == 'users' %>">
+        <%= link_to users_path do %>
+          <span class="icon">👥</span>
+          Users
+        <% end %>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <p><strong><%= current_user.email %></strong></p>
+      <p><%= current_user.organization&.name %></p>
+    </div>
+    <%= link_to "Sign Out", logout_path, method: :delete, class: "logout-btn" %>
+  </div>
+</div>
